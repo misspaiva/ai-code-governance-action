@@ -1,0 +1,54 @@
+name: "AI Code Governance Action"
+
+description: >
+  Detecta segredos expostos em repositórios e Pull Requests.
+  O código é analisado localmente no GitHub Actions runner.
+
+author: "Sauanna Paiva"
+
+branding:
+  icon: "shield"
+  color: "purple"
+
+inputs:
+  severity-threshold:
+    description: "Nível mínimo de severidade."
+    required: false
+    default: "warning"
+
+  fail-on-secret:
+    description: "Falha o workflow quando um segredo é detectado."
+    required: false
+    default: "true"
+
+  pii-packs:
+    description: "Pacotes de validação de PII. Planejado para v0.2."
+    required: false
+    default: "br"
+
+  ai-provenance:
+    description: "Checagem de proveniência de código IA. Planejado para v0.3."
+    required: false
+    default: "false"
+
+outputs:
+  findings-count:
+    description: "Quantidade de achados detectados."
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Configure Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Run governance scan
+      shell: bash
+      env:
+        INPUT_FAIL_ON_SECRET: ${{ inputs.fail-on-secret }}
+        INPUT_SEVERITY_THRESHOLD: ${{ inputs.severity-threshold }}
+        INPUT_PII_PACKS: ${{ inputs.pii-packs }}
+        INPUT_AI_PROVENANCE: ${{ inputs.ai-provenance }}
+      run: node "${{ github.action_path }}/src/index.js"
